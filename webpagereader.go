@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -32,8 +33,19 @@ func CrawlWebpage(webpageURL string) io.Reader {
 	defer respBody.Close()
 
 	links, wordscount := extractContent(respBody, webpageURL)
-	fmt.Println(links)
-	fmt.Println(wordscount)
+
+	linkSlices := strings.Join(links[:], "\n\n")
+
+	fmt.Println("Links: ", linkSlices)
+	fmt.Println("Extracted links: ", len(links))
+	fmt.Println("Extracted words: ", len(wordscount))
 
 	return respBody
+}
+
+func printMap(mapdata map[string]int) {
+	for key, val := range mapdata {
+		s := fmt.Sprintf("%s : %d", key, val)
+		fmt.Println(s)
+	}
 }

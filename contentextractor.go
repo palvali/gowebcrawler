@@ -25,12 +25,25 @@ func extractContent(httpBody io.Reader, webpageURL string) ([]string, map[string
 		token := page.Token()
 
 		if isAnchorTag(tokenType, token) {
-			extractLinksFromToken(token, &links, webpageURL)
+			cl, ok := extractLinksFromToken(token, webpageURL)
+
+			if ok && !exists(links, cl) {
+				links = append(links, cl)
+			}
 		} else if isTextTag(tokenType, token) {
 			extractedwords := extractTextFromToken(token)
 			addWordsToMap(extractedwords, wordscount)
 		}
 	}
+}
+
+func exists(strlist []string, str string) bool {
+	for _, s := range strlist {
+		if s == str {
+			return true
+		}
+	}
+	return false
 }
 
 func addWordsToMap(data string, wordscount map[string]int) {

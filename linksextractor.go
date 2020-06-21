@@ -1,7 +1,6 @@
 package webcrawler
 
 import (
-	"strconv"
 	"strings"
 
 	"golang.org/x/net/html"
@@ -11,40 +10,15 @@ func isAnchorTag(tokenType html.TokenType, token html.Token) bool {
 	return tokenType == html.StartTagToken && token.DataAtom.String() == "a"
 }
 
-func extractLinksFromToken(token html.Token, links *[]string, webpageURL string) {
+func extractLinksFromToken(token html.Token, webpageURL string) (string, bool) {
 	for _, attr := range token.Attr {
 		if attr.Key == "href" {
 			link := attr.Val
-			tl := formatURL(webpageURL, getOnlyURLPart(link))
-
-			if !exists(*links, tl) {
-				*links = append(*links, tl)
-			}
+			tl := formatURL(webpageURL, link)
+			return tl, true
 		}
 	}
-}
-
-func exists(strlist []string, str string) bool {
-	for _, s := range strlist {
-		if s == str {
-			return true
-		}
-	}
-	return false
-}
-
-func getOnlyURLPart(l string) string {
-	if strings.Contains(l, "#") || strings.Contains(l, "?") {
-		var index int
-		for n, str := range l {
-			if strconv.QuoteRune(str) == "'#'" || strconv.QuoteRune(str) == "'?'" {
-				index = n
-				break
-			}
-		}
-		return l[:index]
-	}
-	return l
+	return "", false
 }
 
 func formatURL(base string, l string) string {

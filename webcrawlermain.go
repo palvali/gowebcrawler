@@ -1,5 +1,5 @@
 package webcrawler
 
-func abc() {
-
+func main() {
+	CrawlWebpage("https://www.crawler-test.com/")
 }
