@@ -15,6 +15,9 @@ func extractLinksFromToken(token html.Token, webpageURL string) (string, bool) {
 		if attr.Key == "href" {
 			link := attr.Val
 			tl := formatURL(webpageURL, link)
+			if tl == "" {
+				break
+			}
 			return tl, true
 		}
 	}
@@ -31,10 +34,6 @@ func formatURL(base string, l string) string {
 		return l
 	case strings.HasPrefix(l, "/"):
 		return base + l
-	case strings.HasPrefix(l, "#"):
-		return base + "/" + l
-	default:
-		return l
 	}
-	return l
+	return ""
 }

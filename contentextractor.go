@@ -1,57 +1,56 @@
 package webcrawler
 
 import (
-	"io"
-	"strings"
+	"fmt"
+	"net/http"
+	"time"
 
 	"golang.org/x/net/html"
 )
 
 // Extract retrieves the information from the webpage body
-func extractContent(httpBody io.Reader, webpageURL string) ([]string, map[string]int) {
+func extractContent(webpageURL string, crawedLinksChannel chan string) {
 
-	links := []string{}
-	wordscount := map[string]int{}
+	client := http.Client{
+		Timeout: 60 * time.Second,
+	}
 
-	page := html.NewTokenizer(httpBody)
+	request, err := http.NewRequest("GET", webpageURL, nil)
+	if err != nil {
+		fmt.Println("Received error while creating new request: ", err)
+		return
+	}
+
+	request.Header.Set("User-Agent", "GoBot v1.0 https://www.github.com/palvali/GoBot - This bot retrieves links and content.")
+
+	response, err := client.Do(request)
+
+	if err != nil {
+		fmt.Println("Received error while connecting to website: ", err)
+		return
+	}
+
+	defer response.Body.Close()
+
+	tokenizer := html.NewTokenizer(response.Body)
 
 	for {
-		tokenType := page.Next()
+		tokenType := tokenizer.Next()
 
 		if tokenType == html.ErrorToken {
-			return links, wordscount
+			return
 		}
 
-		token := page.Token()
+		token := tokenizer.Token()
 
 		if isAnchorTag(tokenType, token) {
 			cl, ok := extractLinksFromToken(token, webpageURL)
 
-			if ok && !exists(links, cl) {
-				links = append(links, cl)
+			if ok {
+				go func() {
+					crawedLinksChannel <- cl
+				}()
 			}
-		} else if isTextTag(tokenType, token) {
-			extractedwords := extractTextFromToken(token)
-			addWordsToMap(extractedwords, wordscount)
 		}
-	}
-}
-
-func exists(strlist []string, str string) bool {
-	for _, s := range strlist {
-		if s == str {
-			return true
-		}
-	}
-	return false
-}
-
-func addWordsToMap(data string, wordscount map[string]int) {
-	if len(data) == 0 {
-		return
-	}
-	words := strings.Fields(data)
-	for _, word := range words {
-		wordscount[word]++
 	}
 }
