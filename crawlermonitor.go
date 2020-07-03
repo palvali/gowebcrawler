@@ -7,9 +7,10 @@ func MonitorCrawling(sitesChannel chan string, crawedLinksChannel chan string, p
 
 	for c := range pendingCountChannel {
 		count += c
-
 		if count == 0 {
 			close(sitesChannel)
+			close(crawedLinksChannel)
+			close(pendingCountChannel)
 		}
 	}
 }

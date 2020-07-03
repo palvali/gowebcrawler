@@ -31,7 +31,10 @@ func formatURL(base string, l string) string {
 	switch {
 	case strings.HasPrefix(l, "https://"):
 	case strings.HasPrefix(l, "http://"):
-		return l
+		if strings.Contains(l, base) {
+			return l
+		}
+		return ""
 	case strings.HasPrefix(l, "/"):
 		return base + l
 	}

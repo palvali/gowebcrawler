@@ -11,11 +11,10 @@ func CrawlerMain() {
 	crawedLinksChannel := make(chan string)
 	pendingCountChannel := make(chan int)
 
-	siteToCrawl := "https://www.crawler-test.com/"
+	siteToCrawl := "https://theuselessweb.com/"
 
 	go func() {
-		sitesChannel <- siteToCrawl
-		pendingCountChannel <- 1
+		crawedLinksChannel <- siteToCrawl
 	}()
 
 	var wg sync.WaitGroup
@@ -23,7 +22,11 @@ func CrawlerMain() {
 	go ProcessCrawledLinks(sitesChannel, crawedLinksChannel, pendingCountChannel)
 	go MonitorCrawling(sitesChannel, crawedLinksChannel, pendingCountChannel)
 
-	wg.Add(1)
-	go CrawlWebpage(&wg, sitesChannel, crawedLinksChannel, pendingCountChannel)
+	var numCrawlerThreads = 50
+	for i := 0; i < numCrawlerThreads; i++ {
+		wg.Add(1)
+		go CrawlWebpage(&wg, sitesChannel, crawedLinksChannel, pendingCountChannel)
+	}
+
 	wg.Wait()
 }
