@@ -1,2 +1,4 @@
 # gowebcrawler
-Web crawler implementation in Go - extracts links and counts words
+Web crawler implementation in Go - extracts links.
+
+Uses goroutines, channels and wait groups.
